@@ -1,27 +1,270 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <title>&lt;model-viewer&gt; template</title>
-    <meta charset="utf-8">
-    <meta name="description" content="&lt;model-viewer&gt; template">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link type="text/css" href="./styles.css" rel="stylesheet"/>
-  </head>
-  <body>
-    <!-- <model-viewer> HTML element -->
-    <model-viewer src="MD2024.glb" ar ar-modes="scene-viewer webxr quick-look" camera-controls tone-mapping="commerce" poster="poster.webp" shadow-intensity="1">
-      <div class="progress-bar hide" slot="progress-bar">
-          <div class="update-bar"></div>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MD Multidisciplinario - Calculadora de Precios</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fuente Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    * { font-family: 'Inter', sans-serif; }
+
+    .gradient-bg {
+      background: linear-gradient(135deg, #8689a5 0%, #161516 100%);
+    }
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .price-card {
+      transition: all 0.3s ease;
+      transform: translateY(0);
+    }
+    .price-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+    .slider {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 8px;
+      border-radius: 5px;
+      background: #e2e8f0;
+      outline: none;
+      width: 100%;
+    }
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #667eea;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    .slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #667eea;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in-up { animation: fadeInUp 0.6s ease-out; }
+  </style>
+</head>
+
+<body class="gradient-bg min-h-screen">
+  <div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="text-center mb-12 fade-in-up">
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+        💫 MD Multidisciplinario
+      </h1>
+      <p class="text-xl text-white/80 max-w-2xl mx-auto">
+        Calculadora de Precios - Productos Personalizados
+      </p>
+    </div>
+
+    <!-- Main Calculator Card -->
+    <div class="max-w-4xl mx-auto glass-effect rounded-3xl p-8 mb-8 fade-in-up">
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- Product Selection -->
+        <div class="space-y-6">
+          <div>
+            <label class="block text-white font-semibold mb-3 text-lg">
+              🎯 Selecciona tu producto
+            </label>
+            <select id="productSelect" class="w-full p-4 rounded-xl border-0 bg-white/20 text-white focus:ring-4 focus:ring-white/30 transition-all">
+              <option value="playera" class="text-gray-800">👕 Playera Ch M G XL</option>
+              <option value="taza" class="text-gray-800">☕ Taza</option>
+              <!--<option value="termo" class="text-gray-800">🌡️ Termo 20oz</option>-->
+              <option value="cilindro-grande" class="text-gray-800">🥤 Cilindro Grande</option>
+              <option value="cilindro-chico" class="text-gray-800">🧋 Cilindro Chico</option>
+              <!--<option value="gorra" class="text-gray-800">🧢 Gorra</option>-->
+              <option value="manga-larga" class="text-gray-800">👔 Playera Manga Larga Ch M G XL</option>
+              <option value="sudadera" class="text-gray-800">🧥 Sudadera con Gorro Ch M G XL</option>
+            </select>
+          </div>
+
+          <!-- Quantity Slider -->
+          <div>
+            <label class="block text-white font-semibold mb-3 text-lg">
+              📦 Cantidad: <span id="quantityValue" class="text-yellow-300">1</span> piezas
+            </label>
+            <input type="range" id="quantitySlider" min="1" max="100" value="1" class="slider">
+            <div class="flex justify-between text-white/60 text-sm mt-2">
+              <span>1</span>
+              <span>50</span>
+              <span>100</span>
+            </div>
+            <div class="text-yellow-300 text-sm mt-2" id="discountInfo">Sin descuento</div>
+          </div>
+
+          <!-- Logo Size -->
+          <div>
+            <label class="block text-white font-semibold mb-3 text-lg">
+              📏 Tamaño del logo
+            </label>
+            <select id="logoSize" class="w-full p-3 rounded-xl border-0 bg-white/20 text-white focus:ring-4 focus:ring-white/30 transition-all">
+              <option value="pequeno" class="text-gray-800">Pequeño</option>
+              <option value="mediano" class="text-gray-800">Mediano</option>
+              <option value="grande" class="text-gray-800">Grande</option>
+            </select>
+          </div>
+
+          <!-- Design Type -->
+          <div>
+            <label class="block text-white font-semibold mb-3 text-lg">
+              🎨 Tipo de diseño
+            </label>
+            <select id="designType" class="w-full p-3 rounded-xl border-0 bg-white/20 text-white focus:ring-4 focus:ring-white/30 transition-all">
+              <option value="simple" class="text-gray-800">Simple (texto/logo básico)</option>
+              <option value="imagen" class="text-gray-800">Imagen/fotografía</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Price Display -->
+        <div class="flex flex-col justify-center">
+          <div class="price-card bg-white/20 rounded-2xl p-8 text-center">
+            <div class="mb-4">
+              <span class="text-white/70 text-lg">Precio por pieza</span>
+              <div class="text-4xl md:text-5xl font-bold text-yellow-300 mb-2">
+                $<span id="unitPrice">180.00</span>
+              </div>
+              <span class="text-white/70">MXN</span>
+            </div>
+
+            <div class="border-t border-white/20 pt-4">
+              <span class="text-white/70 text-lg">Total del pedido</span>
+              <div class="text-3xl md:text-4xl font-bold text-white">
+                $<span id="totalPrice">180.00</span> <span class="text-lg">MXN</span>
+              </div>
+            </div>
+
+            <button id="quoteBtn" class="w-full mt-6 bg-yellow-400 hover:bg-yellow-300 text-gray-800 font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-105 focus:ring-4 focus:ring-yellow-300">
+              💬 Solicitar Cotización
+            </button>
+          </div>
+        </div>
       </div>
-      <button slot="ar-button" id="ar-button">
-          View in your space
-      </button>
-      <div id="ar-prompt">
-          <img src="ar_hand_prompt.png">
+    </div>
+
+    <!-- Features -->
+    <div class="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto fade-in-up">
+      <div class="glass-effect rounded-2xl p-6 text-center">
+        <div class="text-3xl mb-3">🚀</div>
+        <h3 class="text-white font-semibold mb-2">Entrega Rápida</h3>
+        <p class="text-white/70 text-sm">Desde 24 horas</p>
       </div>
-    </model-viewer>  
-    <script src="script.js"></script>
-    <!-- Loads <model-viewer> for browsers: -->
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.2.0/model-viewer.min.js"></script>
-  </body>
+      <div class="glass-effect rounded-2xl p-6 text-center">
+        <div class="text-3xl mb-3">✨</div>
+        <h3 class="text-white font-semibold mb-2">Calidad Premium</h3>
+        <p class="text-white/70 text-sm">Materiales de primera calidad garantizada</p>
+      </div>
+      <div class="glass-effect rounded-2xl p-6 text-center">
+        <div class="text-3xl mb-3">💯</div>
+        <h3 class="text-white font-semibold mb-2">Satisfacción Total</h3>
+        <p class="text-white/70 text-sm">100% garantía en todos nuestros productos</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const priceConfig = {
+      playera: { base: 180 },
+      taza: { base: 50 },
+      termo: { base: 220 },
+      'cilindro-grande': { base: 50 },
+      'cilindro-chico': { base: 30 },
+      gorra: { base: 70 },
+      'manga-larga': { base: 200 },
+      sudadera: { base: 310 }
+    };
+    const logoSizeMultiplier = { pequeno: 1.0, mediano: 1.1111, grande: 1.333333 };
+    const designTypeMultiplier = { simple: 1.0, imagen: 1.1111 };
+    const quantityDiscounts = [
+      { min: 1, max: 9, discount: 0, label: 'Sin descuento' },
+      { min: 10, max: 24, discount: 0.5, label: '5% de descuento' },
+      { min: 25, max: 49, discount: 0.10, label: '10% de descuento' },
+      { min: 50, max: 100, discount: 0.15, label: '15% de descuento' }
+    ];
+
+    const formatMoney = (n) =>
+      Number(n).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    const productSelect = document.getElementById('productSelect');
+    const quantitySlider = document.getElementById('quantitySlider');
+    const quantityValue  = document.getElementById('quantityValue');
+    const logoSize       = document.getElementById('logoSize');
+    const designType     = document.getElementById('designType');
+    const unitPrice      = document.getElementById('unitPrice');
+    const totalPrice     = document.getElementById('totalPrice');
+    const quoteBtn       = document.getElementById('quoteBtn');
+    const discountInfo   = document.getElementById('discountInfo');
+
+    function updatePrice() {
+      const product   = productSelect.value;
+      const quantity  = parseInt(quantitySlider.value, 10);
+      let basePrice   = priceConfig[product].base;
+      basePrice *= logoSizeMultiplier[logoSize.value];
+      basePrice *= designTypeMultiplier[designType.value];
+
+      const discount = quantityDiscounts.find(d => quantity >= d.min && quantity <= d.max);
+      const discountedPrice = basePrice * (1 - discount.discount);
+
+      const finalUnitPrice  = discountedPrice;
+      const finalTotalPrice = finalUnitPrice * quantity;
+
+      unitPrice.textContent  = formatMoney(finalUnitPrice);
+      totalPrice.textContent = formatMoney(finalTotalPrice);
+      discountInfo.textContent = discount.label;
+    }
+
+    quantitySlider.addEventListener('input', function () {
+      quantityValue.textContent = this.value;
+      updatePrice();
+    });
+    logoSize.addEventListener('change', updatePrice);
+    designType.addEventListener('change', updatePrice);
+    productSelect.addEventListener('change', updatePrice);
+
+    quoteBtn.addEventListener('click', function () {
+      const productText    = productSelect.options[productSelect.selectedIndex].text;
+      const quantity       = quantitySlider.value;
+      const logoSizeText   = logoSize.options[logoSize.selectedIndex].text;
+      const designTypeText = designType.options[designType.selectedIndex].text;
+      const total          = totalPrice.textContent;
+
+      alert(
+        `¡Cotización MD Multidisciplinario! 📋\n\n` +
+        `Producto: ${productText}\n` +
+        `Cantidad: ${quantity} piezas\n` +
+        `Tamaño logo: ${logoSizeText}\n` +
+        `Tipo diseño: ${designTypeText}\n` +
+        `Total: $${total} MXN\n\n` +
+        `¡Te contactaremos pronto!`
+      );
+    });
+
+    updatePrice();
+  </script>
+</body>
 </html>
