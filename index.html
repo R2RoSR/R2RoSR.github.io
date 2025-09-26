@@ -18,7 +18,7 @@
     * { font-family: 'Inter', sans-serif; }
 
     .gradient-bg {
-      background: linear-gradient(135deg, #8689a5 0%, #161516 100%);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
     .glass-effect {
       background: rgba(255, 255, 255, 0.1);
@@ -92,14 +92,14 @@
               🎯 Selecciona tu producto
             </label>
             <select id="productSelect" class="w-full p-4 rounded-xl border-0 bg-white/20 text-white focus:ring-4 focus:ring-white/30 transition-all">
-              <option value="playera" class="text-gray-800">👕 Playera Ch M G XL</option>
+              <option value="playera" class="text-gray-800">👕 Playera</option>
               <option value="taza" class="text-gray-800">☕ Taza</option>
-              <!--<option value="termo" class="text-gray-800">🌡️ Termo 20oz</option>-->
+              <option value="termo" class="text-gray-800">🌡️ Termo</option>
               <option value="cilindro-grande" class="text-gray-800">🥤 Cilindro Grande</option>
               <option value="cilindro-chico" class="text-gray-800">🧋 Cilindro Chico</option>
-              <!--<option value="gorra" class="text-gray-800">🧢 Gorra</option>-->
-              <option value="manga-larga" class="text-gray-800">👔 Playera Manga Larga Ch M G XL</option>
-              <option value="sudadera" class="text-gray-800">🧥 Sudadera con Gorro Ch M G XL</option>
+              <option value="gorra" class="text-gray-800">🧢 Gorra</option>
+              <option value="manga-larga" class="text-gray-800">👔 Playera Manga Larga</option>
+              <option value="sudadera" class="text-gray-800">🧥 Sudadera con Gorro</option>
             </select>
           </div>
 
@@ -136,7 +136,7 @@
             </label>
             <select id="designType" class="w-full p-3 rounded-xl border-0 bg-white/20 text-white focus:ring-4 focus:ring-white/30 transition-all">
               <option value="simple" class="text-gray-800">Simple (texto/logo básico)</option>
-              <option value="imagen" class="text-gray-800">Imagen/fotografía</option>
+              <option value="imagen" class="text-gray-800">Imagen (diseño complejo)</option>
             </select>
           </div>
         </div>
@@ -198,13 +198,14 @@
       'manga-larga': { base: 200 },
       sudadera: { base: 310 }
     };
-    const logoSizeMultiplier = { pequeno: 1.0, mediano: 1.1111, grande: 1.333333 };
-    const designTypeMultiplier = { simple: 1.0, imagen: 1.1111 };
+    const logoSizeMultiplier = { pequeno: 1.0, mediano: 1.1, grande: 1.6 };
+    const designTypeMultiplier = { simple: 1.0, imagen: 1.5 };
     const quantityDiscounts = [
       { min: 1, max: 9, discount: 0, label: 'Sin descuento' },
-      { min: 10, max: 24, discount: 0.5, label: '5% de descuento' },
-      { min: 25, max: 49, discount: 0.10, label: '10% de descuento' },
-      { min: 50, max: 100, discount: 0.15, label: '15% de descuento' }
+      { min: 10, max: 24, discount: 0.1, label: '10% de descuento' },
+      { min: 25, max: 49, discount: 0.15, label: '15% de descuento' },
+      { min: 50, max: 99, discount: 0.2, label: '20% de descuento' },
+      { min: 100, max: Infinity, discount: 0.25, label: '25% de descuento' }
     ];
 
     const formatMoney = (n) =>
@@ -238,6 +239,42 @@
       discountInfo.textContent = discount.label;
     }
 
+    // --- WhatsApp ---
+    // Reemplaza por tu número con LADA país (sin +, sin espacios). Ejemplo MX: 52XXXXXXXXXX
+    const WHATSAPP_NUMBER = '52XXXXXXXXXX';
+
+    function buildWhatsAppMessage() {
+      const productText    = productSelect.options[productSelect.selectedIndex].text;
+      const quantity       = quantitySlider.value;
+      const logoSizeText   = logoSize.options[logoSize.selectedIndex].text;
+      const designTypeText = designType.options[designType.selectedIndex].text;
+
+      const unit           = unitPrice.textContent;
+      const total          = totalPrice.textContent;
+
+      const lines = [
+        '¡Hola! Quiero solicitar una cotización 🧾',
+        '',
+        `Producto: ${productText}`,
+        `Cantidad: ${quantity} piezas`,
+        `Tamaño de logo: ${logoSizeText}`,
+        `Tipo de diseño: ${designTypeText}`,
+        `Precio por pieza: $${unit} MXN`,
+        `Total: $${total} MXN`,
+        '',
+        '¿Me ayudas con la orden? 🙌'
+      ];
+
+      return lines.join('\n');
+    }
+
+    function sendWhatsApp() {
+      const text = encodeURIComponent(buildWhatsAppMessage());
+      const url  = `https://wa.me/${528443819060}?text=${text}`;
+      window.open(url, '_blank'); // abre WhatsApp Web o App
+    }
+
+    // Eventos
     quantitySlider.addEventListener('input', function () {
       quantityValue.textContent = this.value;
       updatePrice();
@@ -246,24 +283,10 @@
     designType.addEventListener('change', updatePrice);
     productSelect.addEventListener('change', updatePrice);
 
-    quoteBtn.addEventListener('click', function () {
-      const productText    = productSelect.options[productSelect.selectedIndex].text;
-      const quantity       = quantitySlider.value;
-      const logoSizeText   = logoSize.options[logoSize.selectedIndex].text;
-      const designTypeText = designType.options[designType.selectedIndex].text;
-      const total          = totalPrice.textContent;
+    // Botón de cotización -> WhatsApp
+    quoteBtn.addEventListener('click', sendWhatsApp);
 
-      alert(
-        `¡Cotización MD Multidisciplinario! 📋\n\n` +
-        `Producto: ${productText}\n` +
-        `Cantidad: ${quantity} piezas\n` +
-        `Tamaño logo: ${logoSizeText}\n` +
-        `Tipo diseño: ${designTypeText}\n` +
-        `Total: $${total} MXN\n\n` +
-        `¡Te contactaremos pronto!`
-      );
-    });
-
+    // Inicializar
     updatePrice();
   </script>
 </body>
